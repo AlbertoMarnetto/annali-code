@@ -132,11 +132,16 @@ class GraphicConstants:
 
 def create_bigmap_with_park_meters(api_key, map_global_center, zoom):
     annotated_bigmap_filename = 'bigmap-with-park-meters.jpg'
+    only_parkmeters_filename = 'only-park-meters.jpg'
     try:
         bigmap = Image.open(annotated_bigmap_filename)
+        only_parkmeters = Image.open(only_parkmeters_filename)
     except:
         bigmap = create_bigmap(api_key, map_global_center, zoom)
         draw = ImageDraw.Draw(bigmap)
+
+        only_parkmeters = Image.new('RGB', bigmap.size)
+        draw_only_parkmeters = ImageDraw.Draw(only_parkmeters)
 
         for parkautomat in parkautomat_generator(bigmap.size):
             # Define the coordinates for the marker
@@ -159,10 +164,15 @@ def create_bigmap_with_park_meters(api_key, map_global_center, zoom):
 
             outline_color = "black" if fill_color == GraphicConstants.color_morning_sats else fill_color
             draw_method((marker_coords[0] - marker_size, marker_coords[1] - marker_size,
-                          marker_coords[0] + marker_size, marker_coords[1] + marker_size),
+                         marker_coords[0] + marker_size, marker_coords[1] + marker_size),
                          fill=fill_color, outline=outline_color, width=1)
+            draw_only_parkmeters.rectangle(
+                    (marker_coords[0] - marker_size, marker_coords[1] - marker_size,
+                    marker_coords[0] + marker_size, marker_coords[1] + marker_size),
+                    fill='white', outline='white', width=1)
 
         bigmap.save(annotated_bigmap_filename)
+        only_parkmeters.save(only_parkmeters_filename)
     return bigmap
 
 if __name__ == '__main__':
@@ -192,8 +202,8 @@ Parkautomaten in Köln
         (2, 'grey', draw.rectangle, 10, '4 € / h', None),
         (3, 'grey', draw.ellipse, 8, '2 € / h', None),
         (5, GraphicConstants.color_no_weekends, draw.rectangle, 10, 'Free on weekends', 'Kostenlos am Wochenende'),
-        (7, GraphicConstants.color_morning_sats, draw.rectangle, 10, 'Free on Sat. after 14 and Sun.', 'Kostenlos am Sa. nach 14 Uhr und So.'),
-        (9, GraphicConstants.color_afternoon_sats, draw.rectangle, 10, 'Free on Sat. after 21 and Sun.', 'Kostenlos am Sa. nach 21 Uhr und So.'),
+        (7, GraphicConstants.color_morning_sats, draw.rectangle, 10, 'Free on Sat. after 14 and Sun.', 'Kostenlos am Sa. ab 14 Uhr und So.'),
+        (9, GraphicConstants.color_afternoon_sats, draw.rectangle, 10, 'Free on Sat. after 21 and Sun.', 'Kostenlos am Sa. ab 21 Uhr und So.'),
         (11, GraphicConstants.color_late_sats, draw.rectangle, 10, 'Free on Sunday', 'Kostenlos am Sonntag'),
         (13, GraphicConstants.color_all_week_long, draw.rectangle, 10, 'Paid parking all week round', 'Kostenpflichtig rund um die Woche'),
     ]
